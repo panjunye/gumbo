@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/Gumbo.iml" filepath="$PROJECT_DIR$/Gumbo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/gumbo-android-lib/gumbo-android-lib.iml" filepath="$PROJECT_DIR$/gumbo-android-lib/gumbo-android-lib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/gumbo-sample-android/gumbo-sample-android.iml" filepath="$PROJECT_DIR$/gumbo-sample-android/gumbo-sample-android.iml" />
+    </modules>
+  </component>
+</project>
