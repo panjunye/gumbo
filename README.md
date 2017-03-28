@@ -36,7 +36,7 @@ Add the below code in AndroidManifest.xml
 </application>
 ~~~~
 
-Now,make your MainActivity implements UpdateListener.
+Now,make your MainActivity implements UpdateListener and replace AppKey and UpdateUrl with yours.
 
 ~~~~
 public class MainActivity implements View.OnClickListener, UpdateListener {
@@ -105,4 +105,5 @@ public class MainActivity implements View.OnClickListener, UpdateListener {
 }
 ~~~~
 
+Enjoy!:\)
 
