@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onUpdate(UpdateInfo info) {
 
-
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(info.getTitle())
                 .setMessage(info.getUpdateLog())
