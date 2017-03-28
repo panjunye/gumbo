@@ -3,6 +3,9 @@
 An Android delta update library.
 
 ## Usage
+
+You also need the update server. See also [gumbo-server](https://github.com/panjunye/gumbo-server)
+
 Add repository.
 ~~~~
 allprojects {
