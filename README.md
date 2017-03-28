@@ -36,6 +36,7 @@ Add the below code in AndroidManifest.xml
 </application>
 ~~~~
 
+Now,make your MainActivity implements UpdateListener.
 
 ~~~~
 public class MainActivity implements View.OnClickListener, UpdateListener {
@@ -46,8 +47,9 @@ public class MainActivity implements View.OnClickListener, UpdateListener {
         setContentView(R.layout.activity_main);
         TextView textView = (TextView) findViewById(R.id.textview);
 
-        Gumbo.setAppKey("8619455141c24387993493955a446484");
-        Gumbo.setUpdateUrl("http://172.16.100.28/api/checkupdate/");
+        Gumbo.setAppKey("AppKey");
+
+        Gumbo.setUpdateUrl("UpdateUrl");
 
         Gumbo gumbo = new Gumbo(this);
         gumbo.setListener(this);
