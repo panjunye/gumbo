@@ -74,6 +74,7 @@ public class MainActivity implements View.OnClickListener, UpdateListener {
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        // User is sure to install the new apk.
                         mGumbo.install();
                     }
                 })
@@ -83,6 +84,7 @@ public class MainActivity implements View.OnClickListener, UpdateListener {
 
     @Override
     public void onLatest() {
+        // Currnet version is the latest version.Nothing to do.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("It's the latest version.")
                 .setPositiveButton("OK",null)
