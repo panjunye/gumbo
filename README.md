@@ -1,3 +1,106 @@
 # gumbo
 
 An Android delta update library.
+
+## Usage
+Add repository.
+~~~~
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+~~~~
+
+Add dependencies
+~~~~
+dependencies {
+    compile 'com.github.panjunye:gumbo:-SNAPSHOT'
+}
+~~~~
+
+Add the below code in AndroidManifest.xml
+
+~~~~
+<application>
+    ...
+    <receiver android:name="io.junye.gumbo.lib.DownloadReceiver">
+        <intent-filter>
+            <action android:name="android.intent.action.DOWNLOAD_COMPLETE"/>
+        </intent-filter>
+    </receiver>
+
+    <service android:name="io.junye.gumbo.lib.BspatchService"/>
+    ...
+</application>
+~~~~
+
+
+~~~~
+public class MainActivity implements View.OnClickListener, UpdateListener {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        TextView textView = (TextView) findViewById(R.id.textview);
+
+        Gumbo.setAppKey("8619455141c24387993493955a446484");
+        Gumbo.setUpdateUrl("http://172.16.100.28/api/checkupdate/");
+
+        Gumbo gumbo = new Gumbo(this);
+        gumbo.setListener(this);
+
+        textView.setText("version " + BuildConfig.VERSION_CODE);
+
+        findViewById(R.id.button).setOnClickListener(this);
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        mGumbo.checkUpdate();
+    }
+
+    @Override
+    public void onUpdate(UpdateInfo info) {
+        // Ask user to update.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(info.getTitle())
+                .setMessage(info.getUpdateLog())
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mGumbo.install();
+                    }
+                })
+                .setNegativeButton("Cancel",null)
+                .show();
+    }
+
+    @Override
+    public void onLatest() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("It's the latest version.")
+                .setPositiveButton("OK",null)
+                .show();
+    }
+
+    @Override
+    public void onLoading() {
+        // Show the loading tips.
+    }
+
+    @Override
+    public void onFailed() {
+        // Failed to check update.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Failed to check update.")
+                .setPositiveButton("OK",null)
+                .show();
+    }
+}
+~~~~
+
+
