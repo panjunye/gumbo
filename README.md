@@ -1,3 +1,3 @@
 # gumbo
 
-An Android delta update library
+An Android delta update library.
