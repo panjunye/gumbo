@@ -27,7 +27,7 @@ public class DownloadReceiver extends BroadcastReceiver{
     public void onReceive(final Context context, Intent intent)
     {
 
-        Log.d(DEBUG_TAG,"install complete");
+        Log.d(DEBUG_TAG,"download complete");
 
         if (intent.getAction().equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
         {
@@ -35,10 +35,16 @@ public class DownloadReceiver extends BroadcastReceiver{
 
             long id = SpUtils.get(context).getLong(Gumbo.SP_DOWNLOAD_APK_ID,-1L);
 
+
+
             if(downloadApkId == id) {
                 DownloadManager dManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
 
                 Uri fileUri =  dManager.getUriForDownloadedFile(downloadApkId);
+
+                if(fileUri == null){
+                    return;
+                }
 
                 UpdateInfo info = (UpdateInfo) SpUtils.get(context).getObject(Gumbo.SP_UPDATE_INFO);
                 if(info != null){

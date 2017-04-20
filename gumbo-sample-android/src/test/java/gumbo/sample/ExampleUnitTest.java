@@ -2,6 +2,8 @@ package gumbo.sample;
 
 import org.junit.Test;
 
+import java.net.URLEncoder;
+
 import static org.junit.Assert.*;
 
 /**
@@ -13,5 +15,12 @@ public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() throws Exception {
         assertEquals(4, 2 + 2);
+    }
+
+    @Test
+    public void urlEncodeTest() throws Exception {
+        String url = "http://172.16.100.34/download/千县亿动/com.protruly.qxyd5.0.apk";
+        System.out.println(URLEncoder.encode(url,"utf-8"));
+
     }
 }
