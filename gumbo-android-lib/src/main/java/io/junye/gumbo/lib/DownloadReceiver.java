@@ -62,7 +62,6 @@ public class DownloadReceiver extends BroadcastReceiver{
                         serviceIntent.putExtra(BspatchService.PATCH_PATH,fileUri.getPath());
                         serviceIntent.putExtra(BspatchService.NEW_PATH,newFile.getPath());
                         serviceIntent.putExtra(BspatchService.OLD_PATH,oldPath);
-
                         context.startService(serviceIntent);
                     }
                 }
