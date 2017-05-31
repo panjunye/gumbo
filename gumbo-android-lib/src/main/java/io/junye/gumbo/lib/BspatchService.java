@@ -24,9 +24,10 @@ public class BspatchService extends IntentService {
     public static final String DEBUG_TAG = "BspatchService";
 
     public static final String PATCH_PATH = "io.junye.bspatch.IntentService.PatchPath";
-    public static final String NEW_PATH = "io.junye.bspatch.IntentService.NewPath";
-    public static final String OLD_PATH = "io.junye.bspatch.IntentService.OldPath";
 
+    public static final String NEW_PATH = "io.junye.bspatch.IntentService.NewPath";
+
+    public static final String OLD_PATH = "io.junye.bspatch.IntentService.OldPath";
 
     public BspatchService() {
         super("BspatchService");
@@ -38,27 +39,35 @@ public class BspatchService extends IntentService {
         Context context = getApplicationContext();
 
         String patchPath = intent.getStringExtra(PATCH_PATH);
+
         String newPath = intent.getStringExtra(NEW_PATH);
+
         String oldPath = intent.getStringExtra(OLD_PATH);
+
 
         if(patchPath == null || newPath == null || oldPath == null)
             return;
 
         int result = Bspatch.patch(oldPath,newPath,patchPath);
 
-        if(result == -1)
+        if(result == -1){
+            // patch合成失败，应该清空下载信息UpdateInfo
+            SpUtils.get(context).remove(Gumbo.SP_UPDATE_INFO);
             return;
+        }
+
 
         UpdateInfo info = (UpdateInfo) SpUtils.get(context).getObject(Gumbo.SP_UPDATE_INFO);
 
         info.setApkPath(newPath);
+
         SpUtils.get(context).putObject(Gumbo.SP_UPDATE_INFO,info);
 
         PackageManager packManager = context.getPackageManager();
+
         PackageInfo packageInfo = packManager.getPackageArchiveInfo(newPath,0);
 
         // TODO 根据UpdateInfo校验新APK的MD5
-
         
         if(packageInfo != null
                 && info.getVersionName().equals(packageInfo.versionName)

@@ -49,7 +49,7 @@ public class ApkUtils {
         return 0;
     }
 
-    public static boolean download(Context context,UpdateInfo info){
+    public static boolean download(Context context,UpdateInfo info,boolean allowDelta,String title){
 
         if(info == null || !info.isUpdate()){
             return false;
@@ -57,7 +57,7 @@ public class ApkUtils {
 
         String downloadUrl;
 
-        if(info.isDelta()){
+        if(info.isDelta() && allowDelta){
             downloadUrl = info.getPatchUrl();
         }else{
             downloadUrl = info.getApkUrl();
@@ -68,7 +68,7 @@ public class ApkUtils {
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
 
         request.setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS,fileName)
-                .setTitle("新版本" + info.getVersionName())
+                .setTitle(title + info.getVersionName())
                 .setDescription(info.getUpdateLog())
                 .setMimeType("application/vnd.android.package-archive")
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);

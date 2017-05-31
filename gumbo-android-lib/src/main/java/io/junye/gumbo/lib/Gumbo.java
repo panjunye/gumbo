@@ -2,6 +2,7 @@ package io.junye.gumbo.lib;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -13,15 +14,23 @@ import io.junye.gumbo.lib.util.ApkUtils;
  */
 
 public class Gumbo {
+    
+    public static final String TAG = Gumbo.class.getSimpleName();
+
     public static final String DEBUG_TAG = "Gumbo";
 
     public static final String SP_DOWNLOAD_APK_ID = "io.junye.gumbo.lib.sp.DownloadApkId";
 
     public static final String SP_UPDATE_INFO = "io.junye.gumbo.lib.sp.UpdateInfo";
 
-    static String UPDATE_URL;
+    private static String UPDATE_URL;
 
-    static String APP_KEY;
+    private static String APP_KEY;
+
+    private String appName;
+
+    private boolean allowDelta;
+
 
     public static void setUpdateUrl(String updateUrl){
         if(TextUtils.isEmpty(updateUrl)){
@@ -47,8 +56,58 @@ public class Gumbo {
 
     private UpdateInfo mUpdateInfo;
 
-    public Gumbo(Context context) {
+    private Gumbo(Context context) {
         this.mContext = context;
+    }
+
+    public static class Builder{
+
+        private Context context;
+
+        private String appName;
+
+        private boolean allowDelta;
+
+        public Builder(Context context) {
+
+            this.context = context;
+
+        }
+
+        public Gumbo build(){
+            if(null == UPDATE_URL || null == APP_KEY){
+                throw new RuntimeException("必须设置UPDATE_URL和APP_KEY");
+            }
+
+            Gumbo gumbo = new Gumbo(context);
+
+            if(appName == null){
+                appName = "新版本";
+            }
+
+            gumbo.setAppName(appName);
+
+            return gumbo;
+
+        }
+
+        public String getAppName() {
+            return appName;
+        }
+
+        public Builder setAppName(String appName) {
+            this.appName = appName;
+            return this;
+        }
+
+        public boolean isAllowDelta() {
+            return allowDelta;
+        }
+
+        public Builder setAllowDelta(boolean allowDelta) {
+            this.allowDelta = allowDelta;
+            return this;
+        }
     }
 
     public void checkUpdate() {
@@ -58,8 +117,10 @@ public class Gumbo {
         task.setResponseListener(new BaseAsyncTask.ResponseListener<UpdateInfo>() {
             @Override
             public void onFinish(UpdateInfo info) {
+                Log.d(TAG, "onFinish: 检测更新完成");
                 if (info != null) {
                     if (info.isUpdate()) {
+                        Log.d(TAG, "onFinish: 需要更新");
                         mUpdateInfo = info;
                         if(ApkUtils.getDownloadedApk(mContext,mUpdateInfo) != null){
                             info.setDownloaded(true);
@@ -67,6 +128,7 @@ public class Gumbo {
                         info.setTitle(buildTitle(info));
                         notifyOnUpdate(info);
                     }else{
+                        Log.d(TAG, "onFinish: ");
                         notifyOnLatest();
                     }
                 } else {
@@ -77,11 +139,31 @@ public class Gumbo {
         task.execute();
     }
 
+    public String getAppName() {
+        return appName;
+    }
+
+    public void setAppName(String appName) {
+        this.appName = appName;
+    }
+
+    public boolean isAllowDelta() {
+        return allowDelta;
+    }
+
+    public void setAllowDelta(boolean allowDelta) {
+        this.allowDelta = allowDelta;
+    }
+
     private String buildTitle(UpdateInfo info){
 
         StringBuilder titleBuilder = new StringBuilder();
 
-        titleBuilder.append("新版本:").append(info.getVersionCode()).append("(");
+        titleBuilder
+                .append(getAppName())
+                .append(":")
+                .append(info.getVersionName())
+                .append("(");
 
         if(info.isDownloaded()){
             titleBuilder.append("已下载)");
@@ -125,7 +207,7 @@ public class Gumbo {
             ApkUtils.installApk(mContext,uri);
         }else{
             Log.d(DEBUG_TAG,"APK还没有安装,准备下载");
-            ApkUtils.download(mContext,mUpdateInfo);
+            ApkUtils.download(mContext,mUpdateInfo,allowDelta, appName + mUpdateInfo.getVersionName());
         }
 
     }
@@ -153,8 +235,6 @@ public class Gumbo {
             mListener.onLoading();
         }
     }
-
-
 
     public UpdateListener getListener() {
         return mListener;

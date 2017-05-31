@@ -35,9 +35,8 @@ public class DownloadReceiver extends BroadcastReceiver{
 
             long id = SpUtils.get(context).getLong(Gumbo.SP_DOWNLOAD_APK_ID,-1L);
 
-
-
             if(downloadApkId == id) {
+
                 DownloadManager dManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
 
                 Uri fileUri =  dManager.getUriForDownloadedFile(downloadApkId);
@@ -47,8 +46,9 @@ public class DownloadReceiver extends BroadcastReceiver{
                 }
 
                 UpdateInfo info = (UpdateInfo) SpUtils.get(context).getObject(Gumbo.SP_UPDATE_INFO);
+
                 if(info != null){
-                    if(! info.isDelta()){
+                    if(!info.isDelta()){
                         info.setApkPath(fileUri.getPath());
                         SpUtils.get(context).putObject(Gumbo.SP_UPDATE_INFO,info);
                         ApkUtils.installApk(context,fileUri);

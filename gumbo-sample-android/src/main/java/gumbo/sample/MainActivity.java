@@ -24,9 +24,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mTextView = (TextView) findViewById(R.id.textview);
         mBtnCheckUpdate = (Button) findViewById(R.id.btn_check_update);
 
-        Gumbo.setAppKey("e3ce4b12cc1049a8af728e97a7f3e168");
-        Gumbo.setUpdateUrl("http://172.16.100.34/api/checkupdate/");
-        mGumbo = new Gumbo(this);
+        Gumbo.setAppKey("12d3a97814b84f6cba4a9032f073a4f0");
+        Gumbo.setUpdateUrl("http://172.16.100.184:8080/api/checkupdate/");
+
+        Gumbo.Builder builder = new Gumbo.Builder(getApplicationContext());
+
+        builder.setAppName("Gumbo")
+                .setAllowDelta(true);
+
+        mGumbo = builder.build();
+
         mGumbo.setListener(this);
 
         mTextView.setText("version:" + BuildConfig.VERSION_CODE);
