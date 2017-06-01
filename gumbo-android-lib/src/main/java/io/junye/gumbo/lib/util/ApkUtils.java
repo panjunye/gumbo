@@ -68,7 +68,7 @@ public class ApkUtils {
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
 
         request.setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS,fileName)
-                .setTitle(title + info.getVersionName())
+                .setTitle(title)
                 .setDescription(info.getUpdateLog())
                 .setMimeType("application/vnd.android.package-archive")
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
