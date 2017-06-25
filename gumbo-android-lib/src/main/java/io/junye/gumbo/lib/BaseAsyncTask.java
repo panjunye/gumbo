@@ -4,13 +4,14 @@ import android.os.AsyncTask;
 
 /**
  * Created by Junye on 2017/3/24 0024.
+ *
  */
 
-public  abstract class BaseAsyncTask<Params,Progress,Result> extends AsyncTask<Params,Progress,Result> {
+abstract class BaseAsyncTask<Params,Progress,Result> extends AsyncTask<Params,Progress,Result> {
 
     private ResponseListener<Result> responseListener;
 
-    public interface ResponseListener<Result>{
+    interface ResponseListener<Result>{
         void onFinish(Result result);
     }
 
@@ -20,11 +21,7 @@ public  abstract class BaseAsyncTask<Params,Progress,Result> extends AsyncTask<P
         responseListener.onFinish(result);
     }
 
-    public ResponseListener<Result> getResponseListener() {
-        return responseListener;
-    }
-
-    public void setResponseListener(ResponseListener<Result> responseListener) {
+    void setResponseListener(ResponseListener<Result> responseListener) {
         this.responseListener = responseListener;
     }
 }

@@ -16,7 +16,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private TextView mTextView;
     private Button mBtnCheckUpdate;
-    private Gumbo mGumbo;
+    public static final String UPDATE_URL = "http://172.16.100.182:8080/api/checkupdate/";
+    public static final String UPDATE_KEY = "b8893c0224c34ff4a5e24196f2735b34";
+    private Gumbo gumbo;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,32 +26,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mTextView = (TextView) findViewById(R.id.textview);
         mBtnCheckUpdate = (Button) findViewById(R.id.btn_check_update);
 
-        Gumbo.setAppKey("12d3a97814b84f6cba4a9032f073a4f0");
-        Gumbo.setUpdateUrl("http://172.16.100.184:8080/api/checkupdate/");
 
-        Gumbo.Builder builder = new Gumbo.Builder(getApplicationContext());
-
-        builder.setAppName("Gumbo")
-                .setAllowDelta(true);
-
-        mGumbo = builder.build();
-
-        mGumbo.setListener(this);
 
         mTextView.setText("version:" + BuildConfig.VERSION_CODE);
 
         mBtnCheckUpdate.setOnClickListener(this);
 
+        UpdateHelper updateHelper = new UpdateHelperImpl(this,UPDATE_URL,UPDATE_KEY);
+
+        updateHelper.checkUpdate();
 
     }
 
     @Override
     public void onClick(View v) {
-        mGumbo.checkUpdate();
+        gumbo.checkUpdate();
     }
 
     @Override
-    public void onUpdate(UpdateInfo info) {
+    public void onUpdate(Gumbo gumbo,UpdateInfo info) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(info.getTitle())
@@ -57,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mGumbo.install();
+                        MainActivity.this.gumbo.install();
                     }
                 })
                 .setNegativeButton("取消",null)

@@ -10,9 +10,6 @@ import android.util.Log;
 
 import java.io.File;
 
-import io.junye.gumbo.lib.util.ApkUtils;
-import io.junye.gumbo.lib.util.SpUtils;
-
 
 /**
  * Created by Junye on 2017/3/27 0027.
@@ -21,7 +18,7 @@ import io.junye.gumbo.lib.util.SpUtils;
 
 public class BspatchService extends IntentService {
 
-    public static final String DEBUG_TAG = "BspatchService";
+    public static final String TAG = "BspatchService";
 
     public static final String PATCH_PATH = "io.junye.bspatch.IntentService.PatchPath";
 
@@ -52,16 +49,16 @@ public class BspatchService extends IntentService {
 
         if(result == -1){
             // patch合成失败，应该清空下载信息UpdateInfo
-            SpUtils.get(context).remove(Gumbo.SP_UPDATE_INFO);
+            SpUtils.get(context).remove(UpdateInfo.KEY);
             return;
         }
 
 
-        UpdateInfo info = (UpdateInfo) SpUtils.get(context).getObject(Gumbo.SP_UPDATE_INFO);
+        UpdateInfo info = (UpdateInfo) SpUtils.get(context).getObject(UpdateInfo.KEY);
 
         info.setApkPath(newPath);
 
-        SpUtils.get(context).putObject(Gumbo.SP_UPDATE_INFO,info);
+        SpUtils.get(context).putObject(UpdateInfo.KEY,info);
 
         PackageManager packManager = context.getPackageManager();
 
@@ -72,8 +69,8 @@ public class BspatchService extends IntentService {
         if(packageInfo != null
                 && info.getVersionName().equals(packageInfo.versionName)
                 && info.getVersionCode() == packageInfo.versionCode) {
-            Log.d(DEBUG_TAG,"install apk");
-            ApkUtils.installApk(context,Uri.fromFile(new File(newPath)));
+            Log.d(TAG,"install apk");
+            ApkUtils.installApk(context,newPath);
         }
     }
 

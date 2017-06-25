@@ -6,8 +6,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import io.junye.gumbo.lib.util.JsonUtil;
-
 /**
  * Created by Junye on 2017/3/23 0023.
  *
@@ -18,7 +16,7 @@ class CheckUpdateTask extends BaseAsyncTask<String,Void,UpdateInfo> {
 
     private String mUpdateUrl;
 
-    public CheckUpdateTask(String updateUrl) {
+    CheckUpdateTask(String updateUrl) {
         this.mUpdateUrl = updateUrl;
     }
 

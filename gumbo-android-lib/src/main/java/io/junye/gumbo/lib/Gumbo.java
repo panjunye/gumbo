@@ -2,11 +2,7 @@ package io.junye.gumbo.lib;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.Build;
-import android.text.TextUtils;
 import android.util.Log;
-
-import io.junye.gumbo.lib.util.ApkUtils;
 
 /**
  * Created by Junye on 2017/3/23 0023.
@@ -17,112 +13,44 @@ public class Gumbo {
     
     public static final String TAG = Gumbo.class.getSimpleName();
 
-    public static final String DEBUG_TAG = "Gumbo";
+    static final String SP_DOWNLOAD_APK_ID = "io.junye.gumbo.lib.sp.DownloadApkId";
 
-    public static final String SP_DOWNLOAD_APK_ID = "io.junye.gumbo.lib.sp.DownloadApkId";
-
-    public static final String SP_UPDATE_INFO = "io.junye.gumbo.lib.sp.UpdateInfo";
-
-    private static String UPDATE_URL;
-
-    private static String APP_KEY;
+    private Context context;
 
     private String appName;
 
-    private boolean allowDelta;
+    private String updateUrl;
 
+    private String appKey;
 
-    public static void setUpdateUrl(String updateUrl){
-        if(TextUtils.isEmpty(updateUrl)){
-            throw new IllegalArgumentException("UpdateUrl must not be null");
-        }
+    private boolean deltaOn;
 
-        if(!updateUrl.endsWith("/")){
-            throw new IllegalArgumentException("UpdateUrl must ends with / ");
-        }
-        UPDATE_URL = updateUrl;
-    }
+    private UpdateListener updateListener;
 
-    public static void setAppKey(String appKey){
-        if(TextUtils.isEmpty(appKey)){
-            throw new IllegalArgumentException("AppKey must not be null");
-        }
-        APP_KEY = appKey;
-    }
-
-    private Context mContext;
-
-    private UpdateListener mListener;
-
-    private UpdateInfo mUpdateInfo;
+    private UpdateInfo updateInfo;
 
     private Gumbo(Context context) {
-        this.mContext = context;
-    }
-
-    public static class Builder{
-
-        private Context context;
-
-        private String appName;
-
-        private boolean allowDelta;
-
-        public Builder(Context context) {
-
-            this.context = context;
-
-        }
-
-        public Gumbo build(){
-            if(null == UPDATE_URL || null == APP_KEY){
-                throw new RuntimeException("必须设置UPDATE_URL和APP_KEY");
-            }
-
-            Gumbo gumbo = new Gumbo(context);
-
-            if(appName == null){
-                appName = "新版本";
-            }
-
-            gumbo.setAppName(appName);
-
-            return gumbo;
-
-        }
-
-        public String getAppName() {
-            return appName;
-        }
-
-        public Builder setAppName(String appName) {
-            this.appName = appName;
-            return this;
-        }
-
-        public boolean isAllowDelta() {
-            return allowDelta;
-        }
-
-        public Builder setAllowDelta(boolean allowDelta) {
-            this.allowDelta = allowDelta;
-            return this;
-        }
+        this.context = context;
     }
 
     public void checkUpdate() {
         // 通知正在获取更新信息
         notifyOnLoading();
+
         CheckUpdateTask task = new CheckUpdateTask(buildUpdateUrl());
+
         task.setResponseListener(new BaseAsyncTask.ResponseListener<UpdateInfo>() {
             @Override
             public void onFinish(UpdateInfo info) {
+
                 Log.d(TAG, "onFinish: 检测更新完成");
+
                 if (info != null) {
+
                     if (info.isUpdate()) {
                         Log.d(TAG, "onFinish: 需要更新");
-                        mUpdateInfo = info;
-                        if(ApkUtils.getDownloadedApk(mContext,mUpdateInfo) != null){
+                        updateInfo = info;
+                        if(ApkUtils.getDownloadedApk(context, updateInfo) != null){
                             info.setDownloaded(true);
                         }
                         info.setTitle(buildTitle(info));
@@ -136,23 +64,8 @@ public class Gumbo {
                 }
             }
         });
+
         task.execute();
-    }
-
-    public String getAppName() {
-        return appName;
-    }
-
-    public void setAppName(String appName) {
-        this.appName = appName;
-    }
-
-    public boolean isAllowDelta() {
-        return allowDelta;
-    }
-
-    public void setAllowDelta(boolean allowDelta) {
-        this.allowDelta = allowDelta;
     }
 
     private String buildTitle(UpdateInfo info){
@@ -160,7 +73,7 @@ public class Gumbo {
         StringBuilder titleBuilder = new StringBuilder();
 
         titleBuilder
-                .append(getAppName())
+                .append(appName)
                 .append(":")
                 .append(info.getVersionName())
                 .append("(");
@@ -187,60 +100,161 @@ public class Gumbo {
 
 
     private String buildUpdateUrl(){
-        return Gumbo.UPDATE_URL + "?appKey=" + Gumbo.APP_KEY + "&versionCode=" + ApkUtils.getVersionCode(mContext);
+        return updateUrl + "?appKey=" + appKey + "&versionCode=" + ApkUtils.getCurrentVersion(context);
     }
 
     /**
-     * 用户决定下载APK
+     * 用户决定安装APK
      */
     public void install(){
 
-        if(mUpdateInfo == null){
+        if(updateInfo == null){
             return;
         }
 
         // 判断安装文件是否存在
-        Uri uri = ApkUtils.getDownloadedApk(mContext,mUpdateInfo);
+        String apkPath = ApkUtils.getDownloadedApk(context, updateInfo);
 
-        if(uri != null){
-            Log.d(DEBUG_TAG,"APK已下载，直接安装");
-            ApkUtils.installApk(mContext,uri);
+        if(apkPath != null){
+
+            Log.d(TAG,"APK已下载，直接安装");
+
+            ApkUtils.installApk(context,apkPath);
+
         }else{
-            Log.d(DEBUG_TAG,"APK还没有安装,准备下载");
-            ApkUtils.download(mContext,mUpdateInfo,allowDelta, appName + mUpdateInfo.getVersionName());
+
+            Log.d(TAG,"APK还没有下载,准备下载");
+
+            if(deltaOn){
+                updateInfo.setDelta(deltaOn);
+            }
+
+            ApkUtils.download(context, updateInfo, buildNotification());
         }
 
     }
 
+    private String buildNotification(){
+        return appName + updateInfo.getVersionName();
+    }
+
     private void notifyOnUpdate(UpdateInfo info) {
-        if(mListener != null){
-            mListener.onUpdate(info);
+        if(updateListener != null){
+            updateListener.onUpdate(this,info);
         }
     }
 
     private void notifyOnLatest() {
-        if(mListener != null){
-            mListener.onLatest();
+        if(updateListener != null){
+            updateListener.onLatest();
         }
     }
 
     private void notifyOnFailed() {
-        if(mListener != null){
-            mListener.onFailed();
+        if(updateListener != null){
+            updateListener.onFailed();
         }
     }
 
     private void notifyOnLoading() {
-        if(mListener != null){
-            mListener.onLoading();
+        if(updateListener != null){
+            updateListener.onLoading();
         }
     }
 
-    public UpdateListener getListener() {
-        return mListener;
+    public static class Builder{
+
+        private Context context;
+
+        private String appName;
+
+        private String updateUrl;
+
+        private String appKey;
+
+        private boolean deltaOn;
+
+        private UpdateListener updateListener;
+
+        public Builder(Context context) {
+            this.context = context.getApplicationContext();
+        }
+
+        public Gumbo build(){
+
+            if(null == updateUrl || null == appKey){
+                throw new RuntimeException("必须设置UpdateUrl和AppKey");
+            }
+
+            if(appName == null){
+                appName = "新版本";
+            }
+
+            Gumbo gumbo = new Gumbo(context);
+
+            gumbo.appName = appName;
+
+            gumbo.updateUrl = updateUrl;
+
+            gumbo.appKey = appKey;
+
+            gumbo.deltaOn = deltaOn;
+
+            gumbo.updateListener = updateListener;
+
+            return gumbo;
+
+        }
+
+        public Builder setAppName(String appName) {
+            this.appName = appName;
+            return this;
+        }
+
+        public Builder setUpdateUrl(String updateUrl) {
+            this.updateUrl = updateUrl;
+            return this;
+        }
+
+        public Builder setAppKey(String appKey) {
+            this.appKey = appKey;
+            return this;
+        }
+
+        public Builder setDeltaOn(boolean deltaOn) {
+            this.deltaOn = deltaOn;
+            return this;
+        }
+
+        public Builder setUpdateListener(UpdateListener updateListener) {
+            this.updateListener = updateListener;
+            return this;
+        }
+
+        public Context getContext() {
+            return context;
+        }
+
+        public String getAppName() {
+            return appName;
+        }
+
+        public String getUpdateUrl() {
+            return updateUrl;
+        }
+
+        public String getAppKey() {
+            return appKey;
+        }
+
+        public boolean isDeltaOn() {
+            return deltaOn;
+        }
+
+
+        public UpdateListener getUpdateListener() {
+            return updateListener;
+        }
     }
 
-    public void setListener(UpdateListener listener) {
-        this.mListener = listener;
-    }
 }

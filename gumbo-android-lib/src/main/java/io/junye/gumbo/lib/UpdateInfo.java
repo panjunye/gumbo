@@ -9,9 +9,12 @@ import java.io.Serializable;
  */
 public class UpdateInfo implements Serializable{
 
+    static final String KEY = UpdateInfo.class.getName();
+
     private boolean downloaded;
 
     public UpdateInfo() {
+
     }
 
     /**

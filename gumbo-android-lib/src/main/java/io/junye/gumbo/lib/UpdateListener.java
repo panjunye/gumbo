@@ -6,7 +6,7 @@ package io.junye.gumbo.lib;
 
 public interface UpdateListener {
 
-    void onUpdate(UpdateInfo info);
+    void onUpdate(Gumbo gumbo,UpdateInfo info);
 
     void onLatest();
 

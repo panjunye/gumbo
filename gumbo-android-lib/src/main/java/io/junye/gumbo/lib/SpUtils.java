@@ -1,4 +1,4 @@
-package io.junye.gumbo.lib.util;
+package io.junye.gumbo.lib;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-public class SpUtils {
+class SpUtils {
 
     private SharedPreferences sp;
     private static SpUtils instance;
@@ -35,12 +35,12 @@ public class SpUtils {
         return sp.getInt(key, dValue);
     }
 
-    public SpUtils putLong(String key, long value) {
+    SpUtils putLong(String key, long value) {
         sp.edit().putLong(key, value).apply();
         return this;
     }
 
-    public long getLong(String key, Long dValue) {
+    long getLong(String key, Long dValue) {
         return sp.getLong(key, dValue);
     }
 
@@ -71,7 +71,7 @@ public class SpUtils {
         return sp.getString(key, dValue);
     }
 
-    public boolean putObject(String key,Object object) {
+    boolean putObject(String key, Object object) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos;
         try {
@@ -86,7 +86,7 @@ public class SpUtils {
         return true;
     }
 
-    public Object getObject(String key){
+    Object getObject(String key){
 
         String str = sp.getString(key,null);
         if(str == null)
@@ -115,7 +115,7 @@ public class SpUtils {
         }
     }
 
-    public boolean isExist(String key) {
+    private boolean isExist(String key) {
         return sp.contains(key);
     }
 }

@@ -1,4 +1,4 @@
-package io.junye.gumbo.lib.util;
+package io.junye.gumbo.lib;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,7 +13,7 @@ import java.util.Iterator;
  *
  */
 
-public class JsonUtil {
+class JsonUtil {
     public static <T> T read(Class<T> clazz,String  jsonData){
         T t = null;
         try {

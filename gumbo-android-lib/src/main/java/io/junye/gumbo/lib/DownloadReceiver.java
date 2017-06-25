@@ -10,9 +10,6 @@ import android.util.Log;
 
 import java.io.File;
 
-import io.junye.gumbo.lib.util.ApkUtils;
-import io.junye.gumbo.lib.util.SpUtils;
-
 
 /**
  * Created by Junye on 2017/3/23 0023.
@@ -21,13 +18,13 @@ import io.junye.gumbo.lib.util.SpUtils;
 
 public class DownloadReceiver extends BroadcastReceiver{
 
-    public static final String DEBUG_TAG = "DownloadReceiver";
+    public static final String TAG = "DownloadReceiver";
 
     @Override
     public void onReceive(final Context context, Intent intent)
     {
 
-        Log.d(DEBUG_TAG,"download complete");
+        Log.d(TAG,"download complete");
 
         if (intent.getAction().equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
         {
@@ -35,23 +32,25 @@ public class DownloadReceiver extends BroadcastReceiver{
 
             long id = SpUtils.get(context).getLong(Gumbo.SP_DOWNLOAD_APK_ID,-1L);
 
-            if(downloadApkId == id) {
+            if(downloadApkId != -1L && downloadApkId == id) {
 
                 DownloadManager dManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
 
                 Uri fileUri =  dManager.getUriForDownloadedFile(downloadApkId);
 
                 if(fileUri == null){
+                    Log.d(TAG, "fileUri: 不存在");
                     return;
                 }
 
-                UpdateInfo info = (UpdateInfo) SpUtils.get(context).getObject(Gumbo.SP_UPDATE_INFO);
+                UpdateInfo info = (UpdateInfo) SpUtils.get(context).getObject(UpdateInfo.KEY);
 
                 if(info != null){
+                    // TODO 由于用户设置deltaOn为false，导致即使info.isDelta为true，但是下载的文件仍然可能为apk文件
                     if(!info.isDelta()){
-                        info.setApkPath(fileUri.getPath());
-                        SpUtils.get(context).putObject(Gumbo.SP_UPDATE_INFO,info);
-                        ApkUtils.installApk(context,fileUri);
+                        info.setApkPath(ApkUtils.getRealFilePath(context,fileUri));
+                        SpUtils.get(context).putObject(UpdateInfo.KEY,info);
+                        ApkUtils.installApk(context,info.getApkPath());
                     }else{
 
                         // TODO 应当判断ExternalStorage是否可用
