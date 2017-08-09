@@ -32,12 +32,10 @@ class ApkUtils {
 
     static void installApk(Context context, String apkPath) {
 
-//
         if(apkPath == null){
             Log.e(KEY, "Apk not exists");
             return;
         }
-
 
         Log.d(TAG, "realPath: " + apkPath);
 
@@ -150,7 +148,7 @@ class ApkUtils {
         return true;
     }
 
-    static String getDownloadedApk(Context context, UpdateInfo newInfo){
+    static String getDownloadedApkPath(Context context, UpdateInfo newInfo){
 
         UpdateInfo oldInfo = (UpdateInfo) SpUtils.get(context).getObject(UpdateInfo.KEY);
 
@@ -159,6 +157,7 @@ class ApkUtils {
         }
 
         // TODO 应当判断oldInfo.getApkPath的文件是否存在
+
         return oldInfo.getApkPath();
     }
 }

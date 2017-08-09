@@ -23,7 +23,6 @@ public class DownloadReceiver extends BroadcastReceiver{
     @Override
     public void onReceive(final Context context, Intent intent)
     {
-
         Log.d(TAG,"download complete");
 
         if (intent.getAction().equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE))

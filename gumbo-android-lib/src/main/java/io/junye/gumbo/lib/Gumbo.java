@@ -1,8 +1,9 @@
 package io.junye.gumbo.lib;
 
 import android.content.Context;
-import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
 /**
  * Created by Junye on 2017/3/23 0023.
@@ -19,13 +20,11 @@ public class Gumbo {
 
     private String appName;
 
-    private String updateUrl;
+    private String baseUrl;
 
     private String appKey;
 
     private boolean deltaOn;
-
-    private UpdateListener updateListener;
 
     private UpdateInfo updateInfo;
 
@@ -33,34 +32,40 @@ public class Gumbo {
         this.context = context;
     }
 
-    public void checkUpdate() {
-        // 通知正在获取更新信息
-        notifyOnLoading();
+    void checkUpdate(@NonNull final UpdateListener updateListener) {
 
+        // 通知UI正在获取更新信息
         CheckUpdateTask task = new CheckUpdateTask(buildUpdateUrl());
 
         task.setResponseListener(new BaseAsyncTask.ResponseListener<UpdateInfo>() {
             @Override
             public void onFinish(UpdateInfo info) {
 
-                Log.d(TAG, "onFinish: 检测更新完成");
+                Log.d(TAG, "完成检测更新");
 
                 if (info != null) {
 
                     if (info.isUpdate()) {
-                        Log.d(TAG, "onFinish: 需要更新");
+                        Log.d(TAG, "需要更新");
                         updateInfo = info;
-                        if(ApkUtils.getDownloadedApk(context, updateInfo) != null){
+
+                        if(ApkUtils.getDownloadedApkPath(context, updateInfo) != null){
                             info.setDownloaded(true);
                         }
+
                         info.setTitle(buildTitle(info));
-                        notifyOnUpdate(info);
+
+                        updateListener.onUpdate(Gumbo.this,info);
+
                     }else{
-                        Log.d(TAG, "onFinish: ");
-                        notifyOnLatest();
+                        Log.d(TAG, "已经是最新版本");
+
+                        updateListener.onLatest();
                     }
                 } else {
-                    notifyOnFailed();
+                    Log.d(TAG, "检测更新失败");
+
+                    updateListener.onFailed();
                 }
             }
         });
@@ -95,12 +100,11 @@ public class Gumbo {
     }
 
     private static double getMbSize(double size){
-        return Math.round(size / 1024.0 / 1024.0 * 100) / 100.0;
+        return Math.round(size / 1024 / 1024 * 100) / 100;
     }
 
-
     private String buildUpdateUrl(){
-        return updateUrl + "?appKey=" + appKey + "&versionCode=" + ApkUtils.getCurrentVersion(context);
+        return baseUrl + "api/checkupdate/?appKey=" + appKey + "&versionCode=" + ApkUtils.getCurrentVersion(context);
     }
 
     /**
@@ -113,7 +117,7 @@ public class Gumbo {
         }
 
         // 判断安装文件是否存在
-        String apkPath = ApkUtils.getDownloadedApk(context, updateInfo);
+        String apkPath = ApkUtils.getDownloadedApkPath(context, updateInfo);
 
         if(apkPath != null){
 
@@ -122,6 +126,8 @@ public class Gumbo {
             ApkUtils.installApk(context,apkPath);
 
         }else{
+
+            Toast.makeText(context,"准备下载",Toast.LENGTH_SHORT).show();
 
             Log.d(TAG,"APK还没有下载,准备下载");
 
@@ -138,51 +144,25 @@ public class Gumbo {
         return appName + updateInfo.getVersionName();
     }
 
-    private void notifyOnUpdate(UpdateInfo info) {
-        if(updateListener != null){
-            updateListener.onUpdate(this,info);
-        }
-    }
-
-    private void notifyOnLatest() {
-        if(updateListener != null){
-            updateListener.onLatest();
-        }
-    }
-
-    private void notifyOnFailed() {
-        if(updateListener != null){
-            updateListener.onFailed();
-        }
-    }
-
-    private void notifyOnLoading() {
-        if(updateListener != null){
-            updateListener.onLoading();
-        }
-    }
-
     public static class Builder{
 
         private Context context;
 
         private String appName;
 
-        private String updateUrl;
+        private String baseUrl;
 
         private String appKey;
 
         private boolean deltaOn;
 
-        private UpdateListener updateListener;
-
         public Builder(Context context) {
             this.context = context.getApplicationContext();
         }
 
-        public Gumbo build(){
+        public Gumbo create(){
 
-            if(null == updateUrl || null == appKey){
+            if(null == baseUrl || null == appKey){
                 throw new RuntimeException("必须设置UpdateUrl和AppKey");
             }
 
@@ -194,13 +174,11 @@ public class Gumbo {
 
             gumbo.appName = appName;
 
-            gumbo.updateUrl = updateUrl;
+            gumbo.baseUrl = baseUrl;
 
             gumbo.appKey = appKey;
 
             gumbo.deltaOn = deltaOn;
-
-            gumbo.updateListener = updateListener;
 
             return gumbo;
 
@@ -211,8 +189,8 @@ public class Gumbo {
             return this;
         }
 
-        public Builder setUpdateUrl(String updateUrl) {
-            this.updateUrl = updateUrl;
+        public Builder setBaseUrl(String baseUrl) {
+            this.baseUrl = baseUrl;
             return this;
         }
 
@@ -226,11 +204,6 @@ public class Gumbo {
             return this;
         }
 
-        public Builder setUpdateListener(UpdateListener updateListener) {
-            this.updateListener = updateListener;
-            return this;
-        }
-
         public Context getContext() {
             return context;
         }
@@ -239,8 +212,8 @@ public class Gumbo {
             return appName;
         }
 
-        public String getUpdateUrl() {
-            return updateUrl;
+        public String getBaseUrl() {
+            return baseUrl;
         }
 
         public String getAppKey() {
@@ -251,10 +224,6 @@ public class Gumbo {
             return deltaOn;
         }
 
-
-        public UpdateListener getUpdateListener() {
-            return updateListener;
-        }
     }
 
 }

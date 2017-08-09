@@ -13,7 +13,6 @@ import java.net.URL;
 
 class CheckUpdateTask extends BaseAsyncTask<String,Void,UpdateInfo> {
 
-
     private String mUpdateUrl;
 
     CheckUpdateTask(String updateUrl) {
