@@ -1,12 +1,10 @@
 # gumbo
+一个Android增量更新库
 
-An Android delta update library.
+## 用法
+使用之前，需要启动增量更新服务器，详见 [gumbo-server](https://github.com/panjunye/gumbo-server)
 
-## Usage
-
-You also need the update server. See also [gumbo-server](https://github.com/panjunye/gumbo-server)
-
-Add repository.
+在gradle文件中添加下面配置
 ~~~~
 allprojects {
     repositories {
@@ -16,30 +14,14 @@ allprojects {
 }
 ~~~~
 
-Add dependencies
+添加依赖
 ~~~~
 dependencies {
     compile 'com.github.panjunye:gumbo:-SNAPSHOT'
 }
 ~~~~
 
-Add the below code in AndroidManifest.xml
-
-~~~~
-<application>
-    ...
-    <receiver android:name="io.junye.gumbo.lib.DownloadReceiver">
-        <intent-filter>
-            <action android:name="android.intent.action.DOWNLOAD_COMPLETE"/>
-        </intent-filter>
-    </receiver>
-
-    <service android:name="io.junye.gumbo.lib.BspatchService"/>
-    ...
-</application>
-~~~~
-
-Now,make your MainActivity implements UpdateListener and replace AppKey and UpdateUrl with yours.
+现在，让MainActivity实现UpdateListener接口，将AppKey和UpdateUrl替换成你的.UpdateUrl就是[gumbo-server](https://github.com/panjunye/gumbo-server)的更新api的地址。
 
 ~~~~ Java
 public class MainActivity implements View.OnClickListener, UpdateListener {
