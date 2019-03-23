@@ -41,71 +41,45 @@ Add the below code in AndroidManifest.xml
 
 Now,make your MainActivity implements UpdateListener and replace AppKey and UpdateUrl with yours.
 
-~~~~
+~~~~ Java
 public class MainActivity implements View.OnClickListener, UpdateListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        TextView textView = (TextView) findViewById(R.id.textview);
 
         Gumbo.setAppKey("AppKey");
-
         Gumbo.setUpdateUrl("UpdateUrl");
 
         Gumbo gumbo = new Gumbo(this);
         gumbo.setListener(this);
-
-        textView.setText("version " + BuildConfig.VERSION_CODE);
-
         findViewById(R.id.button).setOnClickListener(this);
-
     }
 
     @Override
     public void onClick(View v) {
-        mGumbo.checkUpdate();
+        mGumbo.checkUpdate(); // 检测更新
     }
 
     @Override
     public void onUpdate(UpdateInfo info) {
-        // Ask user to update.
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(info.getTitle())
-                .setMessage(info.getUpdateLog())
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // User is sure to install the new apk.
-                        mGumbo.install();
-                    }
-                })
-                .setNegativeButton("Cancel",null)
-                .show();
+        // 有新版本需要更新
     }
 
     @Override
     public void onLatest() {
-        // Currnet version is the latest version.Nothing to do.
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("It's the latest version.")
-                .setPositiveButton("OK",null)
-                .show();
+        // 当前版本是最新的，无需更新
     }
 
     @Override
     public void onLoading() {
-        // Show the loading tips.
+        // 正在请求服务器，可现实加载动画
     }
 
     @Override
     public void onFailed() {
-        // Failed to check update.
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Failed to check update.")
-                .setPositiveButton("OK",null)
-                .show();
+        // 检测更新失败
     }
 }
 ~~~~
